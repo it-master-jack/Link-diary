@@ -69,11 +69,19 @@
       border-radius: 14px;
       margin-top: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: relative;
     }
     img {
       max-width: 120px;
       border-radius: 10px;
       margin-top: 10px;
+    }
+    .copy-button {
+      background-color: #4CAF50;
+      margin-top: 15px;
+    }
+    .copy-button:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
@@ -159,21 +167,38 @@ function renderProfiles() {
     return;
   }
 
-  profiles.forEach(profile => {
+  profiles.forEach((profile, index) => {
     const div = document.createElement('div');
     div.className = 'profile-card';
     div.innerHTML = `
       <p><strong>Name:</strong> ${profile.name}</p>
       <p><strong>Country:</strong> ${profile.country}</p>
       <img src="${profile.photo}" alt="Uploaded Photo">
-      <div class="links-list">
+      <div class="links-list" id="links-${index}">
         ${profile.links.map(link => {
           const domain = link.split('/')[2];
           return `<a class="link-badge" href="${link}" target="_blank">${domain}</a>`;
         }).join('')}
       </div>
+      <button class="copy-button" onclick="copyLinks(${index}, this)">Copy All Links</button>
     `;
     profilesContainer.appendChild(div);
+  });
+}
+
+// Copy links function
+function copyLinks(index, btn) {
+  const profiles = JSON.parse(localStorage.getItem('profiles')) || [];
+  if (!profiles[index]) return;
+
+  const textToCopy = profiles[index].links.join('\n');
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    btn.textContent = "Copied!";
+    btn.style.backgroundColor = "#28a745";
+    setTimeout(() => {
+      btn.textContent = "Copy All Links";
+      btn.style.backgroundColor = "#4CAF50";
+    }, 1500);
   });
 }
 
