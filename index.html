@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Virtual Link Diary</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      padding: 30px;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    form, .output {
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 16px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin: 12px 0 6px;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background-color: #66a6ff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #4f8ef7;
+    }
+    .link-badge {
+      display: inline-block;
+      background: #4f8ef7;
+      color: #fff;
+      padding: 8px 16px;
+      margin: 5px 5px 0 0;
+      border-radius: 20px;
+      text-decoration: none;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+    .link-badge:hover {
+      background: #3c75cc;
+    }
+    .profile-card {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 14px;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    img {
+      max-width: 120px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Virtual Link Diary</h1>
+
+<form id="profileForm">
+  <label for="name">Name:</label>
+  <input type="text" id="name" required>
+
+  <label for="country">Country:</label>
+  <input type="text" id="country" required>
+
+  <label for="photo">Photo:</label>
+  <input type="file" id="photo" accept="image/*" required>
+
+  <label for="link">Profile Link (any one domain):</label>
+  <input type="url" id="link" placeholder="https://livuapp.com/profile/YourID" required>
+
+  <button type="submit">Save to Diary</button>
+</form>
+
+<div class="output" id="output">
+  <h2 style="text-align:center;">Saved Profiles</h2>
+  <div id="profilesContainer"></div>
+</div>
+
+<script>
+const domains = ["livcam.me", "livuapp.com", "tumile.chat", "gomeet.today", "mixu.chat"];
+const profilesContainer = document.getElementById('profilesContainer');
+const EXPIRY_MINUTES = 10;
+
+// Save profile on form submit
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const name = document.getElementById('name').value.trim();
+  const country = document.getElementById('country').value.trim();
+  const link = document.getElementById('link').value.trim();
+  const photoInput = document.getElementById('photo');
+
+  if (!link.includes('/profile/')) {
+    alert('Please enter a valid profile link.');
+    return;
+  }
+
+  const idPart = link.split('/profile/')[1];
+  const generatedLinks = domains.map(domain => `https://${domain}/profile/${idPart}`);
+
+  if (photoInput.files && photoInput.files[0]) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const profile = {
+        name: name,
+        country: country,
+        photo: e.target.result,
+        links: generatedLinks,
+        timestamp: Date.now()
+      };
+      saveProfile(profile);
+      renderProfiles();
+    }
+    reader.readAsDataURL(photoInput.files[0]);
+  }
+});
+
+// Save to localStorage
+function saveProfile(profile) {
+  let profiles = JSON.parse(localStorage.getItem('profiles')) || [];
+  profiles.push(profile);
+  localStorage.setItem('profiles', JSON.stringify(profiles));
+  localStorage.setItem('timestamp', Date.now());
+}
+
+// Render all profiles
+function renderProfiles() {
+  let profiles = JSON.parse(localStorage.getItem('profiles')) || [];
+  profilesContainer.innerHTML = '';
+
+  if (profiles.length === 0) {
+    profilesContainer.innerHTML = '<p style="text-align:center;">No profiles saved yet.</p>';
+    return;
+  }
+
+  profiles.forEach(profile => {
+    const div = document.createElement('div');
+    div.className = 'profile-card';
+    div.innerHTML = `
+      <p><strong>Name:</strong> ${profile.name}</p>
+      <p><strong>Country:</strong> ${profile.country}</p>
+      <img src="${profile.photo}" alt="Uploaded Photo">
+      <div class="links-list">
+        ${profile.links.map(link => {
+          const domain = link.split('/')[2];
+          return `<a class="link-badge" href="${link}" target="_blank">${domain}</a>`;
+        }).join('')}
+      </div>
+    `;
+    profilesContainer.appendChild(div);
+  });
+}
+
+// Auto-clear profiles after 10 minutes
+function checkExpiry() {
+  const savedTimestamp = localStorage.getItem('timestamp');
+  const now = Date.now();
+
+  if (savedTimestamp && (now - savedTimestamp) > EXPIRY_MINUTES * 60 * 1000) {
+    localStorage.removeItem('profiles');
+    localStorage.removeItem('timestamp');
+    profilesContainer.innerHTML = '<p style="text-align:center;">All profiles expired and were deleted.</p>';
+  }
+}
+
+// Setup
+function setup() {
+  checkExpiry();
+  renderProfiles();
+}
+
+// Initialize
+setup();
+</script>
+
+</body>
+</html>
