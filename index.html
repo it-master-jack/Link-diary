@@ -2,102 +2,116 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Virtual Link Diary</title>
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f0f4f8;
+      --bg: #f9fafb;
       --card-bg: #ffffff;
-      --primary: #4f8ef7;
-      --primary-hover: #3c75cc;
-      --text: #333333;
-      --modal-bg: rgba(0,0,0,0.5);
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --text: #1f2937;
+      --input-bg: #f3f4f6;
+      --modal-bg: rgba(0,0,0,0.6);
     }
     [data-theme="dark"] {
-      --bg: #1e1e2a;
-      --card-bg: #2a2a3d;
-      --text: #e0e0e0;
+      --bg: #1f2937;
+      --card-bg: #374151;
+      --text: #f3f4f6;
+      --input-bg: #4b5563;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', sans-serif;
       background: var(--bg);
       color: var(--text);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      min-height: 100vh;
     }
     header {
+      background: var(--card-bg);
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem;
-      background: var(--card-bg);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    header h1 { font-size: 1.5rem; }
-    .controls { display: flex; gap: 0.5rem; }
+    header h1 { font-size: 1.75rem; }
+    .controls { display: flex; gap: 0.75rem; }
     .btn {
       padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 8px;
       background: var(--primary);
       color: #fff;
+      border: none;
+      border-radius: 0.5rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background 0.2s;
     }
     .btn:hover { background: var(--primary-hover); }
-    .btn-icon { display: inline-flex; align-items: center; gap: 0.25rem; }
     main {
       flex: 1;
-      padding: 1rem;
+      padding: 2rem;
       max-width: 1200px;
       margin: 0 auto;
     }
-    .search { margin-bottom: 1rem; }
-    .search input {
+    .search-bar {
+      margin-bottom: 1.5rem;
+    }
+    .search-bar input {
       width: 100%;
-      padding: 0.75rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: var(--input-bg);
       font-size: 1rem;
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
     }
     .card {
       background: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 1rem;
-      opacity: 0;
-      animation: fadeIn 0.5s forwards;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      animation: fadeIn 0.4s ease-in;
     }
-    @keyframes fadeIn { to { opacity: 1; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }
     .card img {
       width: 100%;
-      border-radius: 8px;
-      margin: 0.5rem 0;
+      aspect-ratio: 4/3;
+      object-fit: cover;
     }
+    .card-content {
+      padding: 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .card-content h2 { font-size: 1.25rem; }
+    .card-content p { font-size: 0.95rem; line-height: 1.4; }
     .links {
+      margin-top: auto;
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
-      margin-top: 0.5rem;
     }
     .link-badge {
       background: var(--primary);
       color: #fff;
-      padding: 0.5rem 0.75rem;
-      border-radius: 999px;
+      padding: 0.4rem 0.75rem;
+      border-radius: 9999px;
       text-decoration: none;
-      font-size: 0.875rem;
-      transition: background 0.3s;
+      font-size: 0.85rem;
+      transition: background 0.2s;
     }
     .link-badge:hover { background: var(--primary-hover); }
     .modal {
@@ -105,182 +119,195 @@
       inset: 0;
       background: var(--modal-bg);
       display: none;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       padding: 1rem;
     }
     .modal.open { display: flex; }
     .modal-content {
       background: var(--card-bg);
-      border-radius: 12px;
+      border-radius: 0.75rem;
       padding: 1.5rem;
       width: 100%;
       max-width: 400px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.2);
       position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
-    .modal-content input,
-    .modal-content button {
-      width: 100%;
-      padding: 0.75rem;
-      margin-top: 0.75rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+    .modal-content input[type="text"],
+    .modal-content input[type="url"] {
+      padding: 0.6rem 0.8rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: var(--input-bg);
       font-size: 1rem;
     }
-    .modal-content button {
-      border: none;
-      background: var(--primary);
-      color: #fff;
-      cursor: pointer;
-      transition: background 0.3s;
+    .modal-content input[type="file"] {
+      font-size: 0.9rem;
     }
-    .modal-content button:hover { background: var(--primary-hover); }
     .modal-close {
       position: absolute;
       top: 0.5rem;
       right: 0.5rem;
       background: transparent;
       border: none;
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       cursor: pointer;
       color: var(--text);
     }
   </style>
 </head>
 <body data-theme="light">
-<header>
-  <h1>Virtual Link Diary</h1>
-  <div class="controls">
-    <button id="connectBtn" class="btn">Connect Sheets</button>
-    <button id="themeToggle" class="btn">Dark Mode</button>
-    <button id="openModal" class="btn">Add Profile</button>
+  <header>
+    <h1>Virtual Link Diary</h1>
+    <div class="controls">
+      <button id="exportBtn" class="btn">Export</button>
+      <button id="importBtn" class="btn">Import</button>
+      <button id="themeToggle" class="btn">Dark Mode</button>
+      <button id="openModal" class="btn">Add Profile</button>
+    </div>
+    <input id="importInput" type="file" accept=".json" style="display:none">
+  </header>
+  <main>
+    <div class="search-bar">
+      <input id="searchInput" type="text" placeholder="Search by name or country…">
+    </div>
+    <div id="profilesContainer" class="grid"></div>
+  </main>
+
+  <div id="profileModal" class="modal">
+    <div class="modal-content">
+      <button id="closeModal" class="modal-close">×</button>
+      <input id="name" type="text" placeholder="Name" required>
+      <input id="country" type="text" placeholder="Country" required>
+      <input id="description" type="text" placeholder="Description">
+      <input id="photo" type="file" accept="image/*" required>
+      <input id="link" type="url" placeholder="https://example.com/profile/YourID" required>
+      <button id="saveBtn" class="btn">Save Profile</button>
+    </div>
   </div>
-</header>
-<main>
-  <div class="search">
-    <input type="text" id="searchInput" placeholder="Search by name or country…">
-  </div>
-  <div class="grid" id="profilesContainer"></div>
-</main>
-<div id="profileModal" class="modal">
-  <div class="modal-content">
-    <button id="closeModal" class="modal-close">×</button>
-    <input type="text" id="name" placeholder="Name" required>
-    <input type="text" id="country" placeholder="Country" required>
-    <input type="text" id="description" placeholder="Description">
-    <input type="file" id="photo" accept="image/*" required>
-    <input type="url" id="link" placeholder="https://livuapp.com/profile/YourID" required>
-    <button id="saveBtn" class="btn">Save to Diary</button>
-  </div>
-</div>
-<script src="https://apis.google.com/js/api.js" async defer onload="onApiLoad()"></script>
-<script>
-const CLIENT_ID='YOUR_CLIENT_ID'
-const API_KEY='YOUR_API_KEY'
-const APP_ID='YOUR_APP_ID'
-const DISCOVERY=['https://sheets.googleapis.com/$discovery/rest?version=v4']
-const SCOPES='https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets'
-const domains=['livcam.me','livuapp.com','tumile.chat','gomeet.today','mixu.chat']
-const EXPIRY=10*60*1000
-const PK='profiles'
-const TK='timestamp'
-let sheetId=''
-let gapiReady=false
-function onApiLoad(){
-  gapi.load('client:auth2',()=>gapi.client.init({apiKey:API_KEY,clientId:CLIENT_ID,discoveryDocs:DISCOVERY,scope:SCOPES}).then(()=>gapiReady=true))
-  gapi.load('picker',{})
-}
-document.getElementById('connectBtn').addEventListener('click',()=>{
-  if(!gapiReady) return
-  gapi.auth2.getAuthInstance().signIn().then(()=>createPicker())
-})
-function createPicker(){
-  const oauth=gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token
-  const view=new google.picker.View(google.picker.ViewId.SPREADSHEETS)
-  new google.picker.PickerBuilder().setAppId(APP_ID).setDeveloperKey(API_KEY).setOAuthToken(oauth).addView(view).setCallback(pickerCallback).build().setVisible(true)
-}
-function pickerCallback(data){
-  if(data[google.picker.Response.ACTION]=='PICKED'){
-    sheetId=data[google.picker.Response.DOCUMENTS][0].id
-    initHeaders()
-  }
-}
-function initHeaders(){
-  gapi.client.sheets.spreadsheets.values.get({spreadsheetId:sheetId,range:'Sheet1!A1:H1'}).then(res=>{
-    if(!res.result.values||!res.result.values.length){
-      const h=['Name','Country','Description','Link1','Link2','Link3','Link4','Link5']
-      gapi.client.sheets.spreadsheets.values.update({spreadsheetId:sheetId,range:'Sheet1!A1:H1',valueInputOption:'USER_ENTERED',resource:{values:[h]}})
+
+  <script>
+    const PK = 'profiles';
+    const profilesContainer = document.getElementById('profilesContainer');
+    const modal = document.getElementById('profileModal');
+    const openModalBtn = document.getElementById('openModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const saveBtn = document.getElementById('saveBtn');
+    const themeToggle = document.getElementById('themeToggle');
+    const searchInput = document.getElementById('searchInput');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importInput = document.getElementById('importInput');
+
+    let profiles = JSON.parse(localStorage.getItem(PK)) || [];
+
+    function saveProfiles() {
+      localStorage.setItem(PK, JSON.stringify(profiles));
     }
-  })
-}
-const profilesContainer=document.getElementById('profilesContainer')
-const modal=document.getElementById('profileModal')
-const openModalBtn=document.getElementById('openModal')
-const closeModalBtn=document.getElementById('closeModal')
-const saveBtn=document.getElementById('saveBtn')
-const themeToggle=document.getElementById('themeToggle')
-const searchInput=document.getElementById('searchInput')
-openModalBtn.addEventListener('click',()=>modal.classList.add('open'))
-closeModalBtn.addEventListener('click',()=>modal.classList.remove('open'))
-saveBtn.addEventListener('click',()=>{
-  const n=document.getElementById('name').value.trim()
-  const c=document.getElementById('country').value.trim()
-  const d=document.getElementById('description').value.trim()
-  const l=document.getElementById('link').value.trim()
-  const p=document.getElementById('photo')
-  if(!l.includes('/profile/')) return
-  const id=l.split('/profile/')[1]
-  const links=domains.map(d=>`https://${d}/profile/${id}`)
-  if(p.files[0]){
-    const r=new FileReader()
-    r.onload=e=>{
-      const prof={name:n,country:c,description:d,photo:e.target.result,links,timestamp:Date.now()}
-      const arr=JSON.parse(localStorage.getItem(PK))||[]
-      arr.push(prof)
-      localStorage.setItem(PK,JSON.stringify(arr))
-      localStorage.setItem(TK,Date.now())
-      modal.classList.remove('open')
-      renderProfiles()
-      if(gapiReady&&sheetId) appendToSheet(prof)
+
+    function renderProfiles() {
+      const filter = searchInput.value.toLowerCase();
+      profilesContainer.innerHTML = profiles
+        .filter(p => p.name.toLowerCase().includes(filter) || p.country.toLowerCase().includes(filter))
+        .map(p => `
+          <div class="card">
+            <img src="${p.photo}" alt="Photo of ${p.name}">
+            <div class="card-content">
+              <h2>${p.name}</h2>
+              <p><strong>Country:</strong> ${p.country}</p>
+              <p>${p.description}</p>
+              <div class="links">
+                ${p.links.map(url => `<a href="${url}" target="_blank" class="link-badge">${new URL(url).hostname}</a>`).join('')}
+              </div>
+            </div>
+          </div>
+        `).join('') || '<p style="grid-column:1/-1; text-align:center;">No profiles to display.</p>';
     }
-    r.readAsDataURL(p.files[0])
-  }
-})
-function appendToSheet(p){
-  const b={values:[[p.name,p.country,p.description,...p.links]]}
-  gapi.client.sheets.spreadsheets.values.append({spreadsheetId:sheetId,range:'Sheet1!A:H',valueInputOption:'USER_ENTERED',resource:b})
-}
-function copyLinks(i,btn){
-  const arr=JSON.parse(localStorage.getItem(PK))||[]
-  navigator.clipboard.writeText(arr[i].links.join('\n')).then(()=>{
-    btn.innerHTML='✔ Copied'
-    setTimeout(()=>btn.innerHTML='<span class="btn-icon">📋 Copy All Links</span>',1500)
-  })
-}
-function checkExpiry(){
-  const t=localStorage.getItem(TK)
-  if(t&&Date.now()-t>EXPIRY){
-    localStorage.removeItem(PK)
-    localStorage.removeItem(TK)
-  }
-}
-function renderProfiles(){
-  checkExpiry()
-  const arr=JSON.parse(localStorage.getItem(PK))||[]
-  const q=searchInput.value.toLowerCase()
-  profilesContainer.innerHTML=arr.filter(p=>p.name.toLowerCase().includes(q)||p.country.toLowerCase().includes(q)).map((p,i)=>
-    `<div class="card"><p><strong>Name:</strong> ${p.name}</p><p><strong>Country:</strong> ${p.country}</p><p><strong>Description:</strong> ${p.description}</p><img src="${p.photo}"><div class="links">${p.links.map(l=>`<a class="link-badge" href="${l}" target="_blank">${new URL(l).hostname}</a>`).join('')}</div><button class="btn btn-icon" onclick="copyLinks(${i},this)"><span>📋 Copy All Links</span></button></div>`
-  ).join('')||'<p style="text-align:center;width:100%;">No profiles found.</p>'
-}
-searchInput.addEventListener('input',renderProfiles)
-themeToggle.addEventListener('click',()=>{
-  const r=document.body
-  const d=r.getAttribute('data-theme')==='dark'
-  r.setAttribute('data-theme',d?'light':'dark')
-  themeToggle.textContent=d?'Dark Mode':'Light Mode'
-})
-document.addEventListener('DOMContentLoaded',renderProfiles)
-</script>
+
+    function addProfile(profile) {
+      profiles.push(profile);
+      saveProfiles();
+      renderProfiles();
+    }
+
+    openModalBtn.addEventListener('click', () => modal.classList.add('open'));
+    closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
+
+    saveBtn.addEventListener('click', () => {
+      const name = document.getElementById('name').value.trim();
+      const country = document.getElementById('country').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const linkField = document.getElementById('link').value.trim();
+      const photoInput = document.getElementById('photo');
+      if (!name || !country || !linkField || !photoInput.files.length) return;
+      const id = linkField.split('/').pop();
+      const domains = ['livcam.me','livuapp.com','tumile.chat','gomeet.today','mixu.chat'];
+      const links = domains.map(d => `https://${d}/profile/${id}`);
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        addProfile({ name, country, description, photo: e.target.result, links });
+        modal.classList.remove('open');
+        document.getElementById('name').value = '';
+        document.getElementById('country').value = '';
+        document.getElementById('description').value = '';
+        document.getElementById('link').value = '';
+        photoInput.value = '';
+      };
+      reader.readAsDataURL(photoInput.files[0]);
+    });
+
+    searchInput.addEventListener('input', renderProfiles);
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      themeToggle.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+      localStorage.setItem('theme', document.body.getAttribute('data-theme'));
+    });
+
+    exportBtn.addEventListener('click', () => {
+      const dataStr = JSON.stringify(profiles, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'profiles_backup.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    importBtn.addEventListener('click', () => importInput.click());
+    importInput.addEventListener('change', () => {
+      const file = importInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            profiles = imported;
+            saveProfiles();
+            renderProfiles();
+            alert('Profiles imported successfully');
+          } else {
+            alert('Invalid JSON format.');
+          }
+        } catch {
+          alert('Could not parse JSON file.');
+        }
+        importInput.value = '';
+      };
+      reader.readAsText(file);
+    });
+
+    // initialize
+    document.body.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
+    themeToggle.textContent = document.body.getAttribute('data-theme') === 'dark' ? 'Light Mode' : 'Dark Mode';
+    renderProfiles();
+  </script>
 </body>
 </html>
