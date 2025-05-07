@@ -4,224 +4,314 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Virtual Link Diary</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #f0f4f8;
+      --card-bg: #ffffff;
+      --primary: #4f8ef7;
+      --primary-hover: #3c75cc;
+      --text: #333333;
+      --modal-bg: rgba(0,0,0,0.5);
+    }
+    [data-theme="dark"] {
+      --bg: #1e1e2a;
+      --card-bg: #2a2a3d;
+      --text: #e0e0e0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #89f7fe, #66a6ff);
-      padding: 30px;
-      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    h1 {
-      text-align: center;
-      color: #fff;
-      margin-bottom: 20px;
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: var(--card-bg);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    form, .output {
-      background: #ffffff;
-      padding: 25px;
-      border-radius: 16px;
-      margin-bottom: 30px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
+    header h1 { font-size: 1.5rem; }
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
     }
-    label {
-      font-weight: bold;
-      display: block;
-      margin: 12px 0 6px;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      border-radius: 10px;
+    .controls input {
+      padding: 0.5rem;
+      border-radius: 8px;
       border: 1px solid #ccc;
-      font-size: 16px;
+      font-size: 0.9rem;
+      width: 200px;
     }
-    button {
-      background-color: #66a6ff;
-      color: white;
-      font-weight: bold;
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
       cursor: pointer;
       transition: background 0.3s;
     }
-    button:hover {
-      background-color: #4f8ef7;
+    .btn:hover { background: var(--primary-hover); }
+    .btn-icon { display: inline-flex; align-items: center; gap: 0.25rem; }
+    main {
+      flex: 1;
+      padding: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .search {
+      margin-bottom: 1rem;
+    }
+    .search input {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 1rem;
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+    }
+    @keyframes fadeIn { to { opacity: 1; } }
+    .card img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin: 0.5rem 0;
+    }
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
     }
     .link-badge {
-      display: inline-block;
-      background: #4f8ef7;
+      background: var(--primary);
       color: #fff;
-      padding: 8px 16px;
-      margin: 5px 5px 0 0;
-      border-radius: 20px;
+      padding: 0.5rem 0.75rem;
+      border-radius: 999px;
       text-decoration: none;
-      font-size: 14px;
+      font-size: 0.875rem;
       transition: background 0.3s;
     }
-    .link-badge:hover {
-      background: #3c75cc;
+    .link-badge:hover { background: var(--primary-hover); }
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--modal-bg);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
     }
-    .profile-card {
-      background: #f9f9f9;
-      padding: 20px;
-      border-radius: 14px;
-      margin-top: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    .modal.open { display: flex; }
+    .modal-content {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
       position: relative;
     }
-    img {
-      max-width: 120px;
-      border-radius: 10px;
-      margin-top: 10px;
+    .modal-content input, .modal-content button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
     }
-    .copy-button {
-      background-color: #4CAF50;
-      margin-top: 15px;
+    .modal-content button {
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
     }
-    .copy-button:hover {
-      background-color: #45a049;
+    .modal-content button:hover { background: var(--primary-hover); }
+    .modal-close {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: transparent;
+      border: none;
+      font-size: 1.25rem;
+      cursor: pointer;
+      color: var(--text);
     }
   </style>
 </head>
-<body>
+<body data-theme="light">
 
-<h1>Virtual Link Diary</h1>
+<header>
+  <h1>Virtual Link Diary</h1>
+  <div class="controls">
+    <input type="text" id="sheetId" placeholder="Google Sheet ID">
+    <button id="connectSheets" class="btn">Connect Sheets</button>
+    <button id="themeToggle" class="btn">Dark Mode</button>
+    <button id="openModal" class="btn">Add Profile</button>
+  </div>
+</header>
 
-<form id="profileForm">
-  <label for="name">Name:</label>
-  <input type="text" id="name" required>
+<main>
+  <div class="search">
+    <input type="text" id="searchInput" placeholder="Search by name or country…">
+  </div>
+  <div class="grid" id="profilesContainer"></div>
+</main>
 
-  <label for="country">Country:</label>
-  <input type="text" id="country" required>
-
-  <label for="photo">Photo:</label>
-  <input type="file" id="photo" accept="image/*" required>
-
-  <label for="link">Profile Link (any one domain):</label>
-  <input type="url" id="link" placeholder="https://livuapp.com/profile/YourID" required>
-
-  <button type="submit">Save to Diary</button>
-</form>
-
-<div class="output" id="output">
-  <h2 style="text-align:center;">Saved Profiles</h2>
-  <div id="profilesContainer"></div>
+<div id="profileModal" class="modal">
+  <div class="modal-content">
+    <button class="modal-close" id="closeModal">×</button>
+    <input type="text" id="name" placeholder="Name" required>
+    <input type="text" id="country" placeholder="Country" required>
+    <input type="text" id="description" placeholder="Description">
+    <input type="file" id="photo" accept="image/*" required>
+    <input type="url" id="link" placeholder="https://livuapp.com/profile/YourID" required>
+    <button id="saveBtn">Save to Diary</button>
+  </div>
 </div>
 
+<script src="https://apis.google.com/js/api.js"></script>
 <script>
-const domains = ["livcam.me", "livuapp.com", "tumile.chat", "gomeet.today", "mixu.chat"];
-const profilesContainer = document.getElementById('profilesContainer');
+const CLIENT_ID = 'YOUR_CLIENT_ID';
+const API_KEY = 'YOUR_API_KEY';
+const DISCOVERY_DOCS = ['https://sheets.googleapis.com/$discovery/rest?version=v4'];
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+
+const domains = ['livcam.me','livuapp.com','tumile.chat','gomeet.today','mixu.chat'];
 const EXPIRY_MINUTES = 10;
+const profilesKey = 'profiles';
+const timeKey = 'timestamp';
 
-// Save profile on form submit
-document.getElementById('profileForm').addEventListener('submit', function(e) {
-  e.preventDefault();
+let sheetId = '';
+let gapiInitialized = false;
 
+const profilesContainer = document.getElementById('profilesContainer');
+const modal = document.getElementById('profileModal');
+const openModalBtn = document.getElementById('openModal');
+const closeModalBtn = document.getElementById('closeModal');
+const saveBtn = document.getElementById('saveBtn');
+const themeToggle = document.getElementById('themeToggle');
+const searchInput = document.getElementById('searchInput');
+const connectSheets = document.getElementById('connectSheets');
+const sheetIdInput = document.getElementById('sheetId');
+
+openModalBtn.addEventListener('click', ()=>modal.classList.add('open'));
+closeModalBtn.addEventListener('click', ()=>modal.classList.remove('open'));
+
+connectSheets.addEventListener('click', ()=>{
+  sheetId = sheetIdInput.value.trim();
+  if (!sheetId) return;
+  gapi.load('client:auth2', initGapi);
+});
+
+function initGapi(){
+  if (gapiInitialized) return;
+  gapi.client.init({apiKey:API_KEY,clientId:CLIENT_ID,discoveryDocs:DISCOVERY_DOCS,scope:SCOPES})
+    .then(()=>gapiInitialized=true);
+}
+
+saveBtn.addEventListener('click', ()=>{
   const name = document.getElementById('name').value.trim();
   const country = document.getElementById('country').value.trim();
+  const description = document.getElementById('description').value.trim();
   const link = document.getElementById('link').value.trim();
   const photoInput = document.getElementById('photo');
-
-  if (!link.includes('/profile/')) {
-    alert('Please enter a valid profile link.');
-    return;
-  }
-
+  if (!link.includes('/profile/')) return;
   const idPart = link.split('/profile/')[1];
-  const generatedLinks = domains.map(domain => `https://${domain}/profile/${idPart}`);
-
+  const generatedLinks = domains.map(d=>`https://${d}/profile/${idPart}`);
   if (photoInput.files && photoInput.files[0]) {
     const reader = new FileReader();
-    reader.onload = function(e) {
-      const profile = {
-        name: name,
-        country: country,
-        photo: e.target.result,
-        links: generatedLinks,
-        timestamp: Date.now()
-      };
-      saveProfile(profile);
+    reader.onload = e=>{
+      const profile = {name,country,description,photo:e.target.result,links:generatedLinks,timestamp:Date.now()};
+      let arr = JSON.parse(localStorage.getItem(profilesKey))||[];
+      arr.push(profile);
+      localStorage.setItem(profilesKey,JSON.stringify(arr));
+      localStorage.setItem(timeKey,Date.now());
+      modal.classList.remove('open');
       renderProfiles();
-    }
+      if (gapiInitialized && sheetId) appendToSheet(profile);
+    };
     reader.readAsDataURL(photoInput.files[0]);
   }
 });
 
-// Save to localStorage
-function saveProfile(profile) {
-  let profiles = JSON.parse(localStorage.getItem('profiles')) || [];
-  profiles.push(profile);
-  localStorage.setItem('profiles', JSON.stringify(profiles));
-  localStorage.setItem('timestamp', Date.now());
+function appendToSheet(profile){
+  const values = [[profile.name,profile.country,profile.description,profile.links[0],profile.links[1],profile.links[2],profile.links[3],profile.links[4]]];
+  const body = {values};
+  gapi.client.sheets.spreadsheets.values.append({
+    spreadsheetId:sheetId,
+    range:'Sheet1!A:H',
+    valueInputOption:'USER_ENTERED',
+    resource:body
+  }).then(()=>{},()=>{});
 }
 
-// Render all profiles
-function renderProfiles() {
-  let profiles = JSON.parse(localStorage.getItem('profiles')) || [];
-  profilesContainer.innerHTML = '';
-
-  if (profiles.length === 0) {
-    profilesContainer.innerHTML = '<p style="text-align:center;">No profiles saved yet.</p>';
-    return;
-  }
-
-  profiles.forEach((profile, index) => {
-    const div = document.createElement('div');
-    div.className = 'profile-card';
-    div.innerHTML = `
-      <p><strong>Name:</strong> ${profile.name}</p>
-      <p><strong>Country:</strong> ${profile.country}</p>
-      <img src="${profile.photo}" alt="Uploaded Photo">
-      <div class="links-list" id="links-${index}">
-        ${profile.links.map(link => {
-          const domain = link.split('/')[2];
-          return `<a class="link-badge" href="${link}" target="_blank">${domain}</a>`;
-        }).join('')}
-      </div>
-      <button class="copy-button" onclick="copyLinks(${index}, this)">Copy All Links</button>
-    `;
-    profilesContainer.appendChild(div);
+function copyLinks(index,btn){
+  const arr = JSON.parse(localStorage.getItem(profilesKey))||[];
+  const text = arr[index].links.join('\n');
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.innerHTML='✔ Copied';
+    setTimeout(()=>btn.innerHTML='<span class="btn-icon">📋 Copy All Links</span>',1500);
   });
 }
 
-// Copy links function
-function copyLinks(index, btn) {
-  const profiles = JSON.parse(localStorage.getItem('profiles')) || [];
-  if (!profiles[index]) return;
-
-  const textToCopy = profiles[index].links.join('\n');
-  navigator.clipboard.writeText(textToCopy).then(() => {
-    btn.textContent = "Copied!";
-    btn.style.backgroundColor = "#28a745";
-    setTimeout(() => {
-      btn.textContent = "Copy All Links";
-      btn.style.backgroundColor = "#4CAF50";
-    }, 1500);
-  });
-}
-
-// Auto-clear profiles after 10 minutes
-function checkExpiry() {
-  const savedTimestamp = localStorage.getItem('timestamp');
-  const now = Date.now();
-
-  if (savedTimestamp && (now - savedTimestamp) > EXPIRY_MINUTES * 60 * 1000) {
-    localStorage.removeItem('profiles');
-    localStorage.removeItem('timestamp');
-    profilesContainer.innerHTML = '<p style="text-align:center;">All profiles expired and were deleted.</p>';
+function checkExpiry(){
+  const saved = localStorage.getItem(timeKey);
+  if (saved && Date.now()-saved>EXPIRY_MINUTES*60*1000){
+    localStorage.removeItem(profilesKey);
+    localStorage.removeItem(timeKey);
   }
 }
 
-// Setup
-function setup() {
+function renderProfiles(){
   checkExpiry();
-  renderProfiles();
+  const arr = JSON.parse(localStorage.getItem(profilesKey))||[];
+  const filter = searchInput.value.toLowerCase();
+  profilesContainer.innerHTML = arr.filter(p=>
+    p.name.toLowerCase().includes(filter)||p.country.toLowerCase().includes(filter)
+  ).map((p,i)=>
+    `<div class="card">
+       <p><strong>Name:</strong> ${p.name}</p>
+       <p><strong>Country:</strong> ${p.country}</p>
+       <p><strong>Description:</strong> ${p.description}</p>
+       <img src="${p.photo}" alt="Photo">
+       <div class="links">${p.links.map(l=>`<a class="link-badge" href="${l}" target="_blank">${new URL(l).hostname}</a>`).join('')}</div>
+       <button class="btn btn-icon" onclick="copyLinks(${i},this)"><span>📋 Copy All Links</span></button>
+     </div>`).join('')||'<p style="text-align:center;width:100%;">No profiles found.</p>';
 }
 
-// Initialize
-setup();
+searchInput.addEventListener('input',renderProfiles);
+
+themeToggle.addEventListener('click',()=>{
+  const root=document.body;
+  const isDark=root.getAttribute('data-theme')==='dark';
+  root.setAttribute('data-theme',isDark?'light':'dark');
+  themeToggle.textContent=isDark?'Dark Mode':'Light Mode';
+});
+
+document.addEventListener('DOMContentLoaded',renderProfiles);
 </script>
 
 </body>
